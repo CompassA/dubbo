@@ -95,6 +95,12 @@ public class RoundRobinLoadBalance extends AbstractLoadBalance {
         long now = System.currentTimeMillis();
         Invoker<T> selectedInvoker = null;
         WeightedRoundRobin selectedWRR = null;
+
+        // step1.每个节点有当前权重和有效权重，均衡负载开始时，所有节点的当前权重为0
+        // step2.每次选择节点时，将累加每个节点的有效权重到当前权重上，并求出所有节点当前权重的和
+        // step3.选择当前权重最大的节点，并减去权重和
+
+        // 增加权重并求和
         for (Invoker<T> invoker : invokers) {
             String identifyString = invoker.getUrl().toIdentityString();
             int weight = getWeight(invoker, invocation);
@@ -117,6 +123,8 @@ public class RoundRobinLoadBalance extends AbstractLoadBalance {
             }
             totalWeight += weight;
         }
+
+        // 减去权重和
         if (invokers.size() != map.size()) {
             map.entrySet().removeIf(item -> now - item.getValue().getLastUpdate() > RECYCLE_PERIOD);
         }
