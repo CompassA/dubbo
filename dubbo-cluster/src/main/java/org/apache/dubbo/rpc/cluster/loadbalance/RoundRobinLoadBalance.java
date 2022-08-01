@@ -66,6 +66,9 @@ public class RoundRobinLoadBalance extends AbstractLoadBalance {
         }
     }
 
+    /**
+     * 接口 -> ip -> 权重
+     */
     private ConcurrentMap<String, ConcurrentMap<String, WeightedRoundRobin>> methodWeightMap = new ConcurrentHashMap<String, ConcurrentMap<String, WeightedRoundRobin>>();
 
     /**
@@ -125,6 +128,7 @@ public class RoundRobinLoadBalance extends AbstractLoadBalance {
         }
 
         // 减去权重和
+        // 删除没更新过的节点
         if (invokers.size() != map.size()) {
             map.entrySet().removeIf(item -> now - item.getValue().getLastUpdate() > RECYCLE_PERIOD);
         }
